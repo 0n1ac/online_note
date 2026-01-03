@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Notepad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Notepad</h1>
+            <div class="theme-selector">
+                <button class="theme-btn" data-theme="light" aria-label="Light Theme" title="Light"></button>
+                <button class="theme-btn" data-theme="dark" aria-label="Dark Theme" title="Dark"></button>
+                <button class="theme-btn" data-theme="gradient-blue" aria-label="Blue Gradient Theme"
+                    title="Blue Gradient"></button>
+                <button class="theme-btn" data-theme="gradient-purple" aria-label="Purple Gradient Theme"
+                    title="Purple Gradient"></button>
+                <button class="theme-btn" data-theme="gradient-sunset" aria-label="Sunset Gradient Theme"
+                    title="Sunset Gradient"></button>
+                <button class="theme-btn" data-theme="gradient-ocean" aria-label="Ocean Gradient Theme"
+                    title="Ocean Gradient"></button>
+                <button class="theme-btn" data-theme="gradient-forest" aria-label="Forest Gradient Theme"
+                    title="Forest Gradient"></button>
+                <button class="theme-btn" data-theme="neon-night" aria-label="Neon Night Theme"
+                    title="Neon Night"></button>
+            </div>
+        </header>
+
+        <main>
+            <div class="editor-wrapper">
+                <div class="editor-container">
+                    <textarea id="notepad" placeholder="Start typing your notes here..."></textarea>
+                </div>
+                <div class="preview-container" id="preview-pane">
+                    <!-- Markdown preview will be rendered here -->
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">Characters (with spaces)</span>
+                    <span class="stat-value" id="char-count-all">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Characters (no spaces)</span>
+                    <span class="stat-value" id="char-count-no-spaces">0</span>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
