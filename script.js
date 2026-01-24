@@ -47,6 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
         splitToggle.checked = savedToggleState === 'true';
     }
 
+    // Initialize logic on load
+    updateCountsAndPreview();
+
     // Theme Switching Logic
     const setTheme = (theme) => {
         // Remove all theme attributes first or just set the new one
