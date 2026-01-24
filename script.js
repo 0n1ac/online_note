@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const appContainer = document.querySelector('.app-container');
     const previewPane = document.getElementById('preview-pane');
+    const splitToggle = document.getElementById('split-toggle');
 
     // Markdown Detection Regex
     const markdownRegex = /^(# |\* |- |> |`|```)/m;
@@ -24,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check for Markdown
         const hasMarkdown = markdownRegex.test(text) || inlineMarkdownRegex.test(text);
 
-        if (hasMarkdown) {
+        if (hasMarkdown && splitToggle.checked) {
             appContainer.classList.add('split-view');
             // Use marked.js to parse markdown
             previewPane.innerHTML = marked.parse(text);
@@ -35,6 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     textarea.addEventListener('input', updateCountsAndPreview);
+    splitToggle.addEventListener('change', () => {
+        updateCountsAndPreview();
+        localStorage.setItem('split-toggle-state', splitToggle.checked);
+    });
+
+    // Load saved toggle state
+    const savedToggleState = localStorage.getItem('split-toggle-state');
+    if (savedToggleState !== null) {
+        splitToggle.checked = savedToggleState === 'true';
+    }
 
     // Theme Switching Logic
     const setTheme = (theme) => {
