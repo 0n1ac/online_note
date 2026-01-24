@@ -7,6 +7,148 @@ document.addEventListener('DOMContentLoaded', () => {
     const appContainer = document.querySelector('.app-container');
     const previewPane = document.getElementById('preview-pane');
     const splitToggle = document.getElementById('split-toggle');
+    const tabsList = document.getElementById('tabs-list');
+    const addTabBtn = document.getElementById('add-tab-btn');
+
+    // Tab State Management
+    let tabs = JSON.parse(localStorage.getItem('notepad-tabs')) || [
+        { id: Date.now(), title: 'Untitled 1', content: '' }
+    ];
+    let activeTabId = parseInt(localStorage.getItem('notepad-active-tab')) || tabs[0].id;
+
+    // Ensure active tab exists
+    if (!tabs.find(t => t.id === activeTabId)) {
+        activeTabId = tabs[0].id;
+    }
+
+    // Save State
+    const saveState = () => {
+        localStorage.setItem('notepad-tabs', JSON.stringify(tabs));
+        localStorage.setItem('notepad-active-tab', activeTabId);
+    };
+
+    // Render Tabs
+    const renderTabs = () => {
+        tabsList.innerHTML = '';
+        tabs.forEach(tab => {
+            const tabEl = document.createElement('div');
+            tabEl.className = `tab-item ${tab.id === activeTabId ? 'active' : ''}`;
+            tabEl.innerHTML = `
+                <span class="tab-title">${tab.title}</span>
+                <span class="tab-close" data-id="${tab.id}">×</span>
+            `;
+
+            // Switch tab on click
+            tabEl.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('tab-close')) {
+                    switchTab(tab.id);
+                }
+            });
+
+            // Context Menu (Right Click)
+            tabEl.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                contextMenuTabId = tab.id;
+
+                // Position menu
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = `${e.clientX}px`;
+                contextMenu.style.top = `${e.clientY}px`;
+            });
+
+            // Close tab
+            tabEl.querySelector('.tab-close').addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeTab(tab.id);
+            });
+
+            tabsList.appendChild(tabEl);
+        });
+    };
+
+    // Switch Tab
+    const switchTab = (id) => {
+        // Save current content before switching
+        const currentTab = tabs.find(t => t.id === activeTabId);
+        if (currentTab) {
+            currentTab.content = textarea.value;
+            // Update title if content starts with #
+            const firstLine = currentTab.content.split('\n')[0].trim();
+            if (firstLine.startsWith('# ')) {
+                currentTab.title = firstLine.substring(2).trim() || 'Untitled';
+            }
+        }
+
+        activeTabId = id;
+        const newTab = tabs.find(t => t.id === activeTabId);
+        textarea.value = newTab.content;
+
+        saveState();
+        renderTabs();
+        updateCountsAndPreview();
+    };
+
+    // Add Tab
+    const addTab = () => {
+        const newId = Date.now();
+        const newTab = {
+            id: newId,
+            title: `Untitled ${tabs.length + 1}`,
+            content: ''
+        };
+        tabs.push(newTab);
+        switchTab(newId);
+    };
+
+    // Close Tab
+    const closeTab = (id) => {
+        if (tabs.length === 1) {
+            alert('Cannot close the last tab.');
+            return;
+        }
+
+        const index = tabs.findIndex(t => t.id === id);
+        tabs = tabs.filter(t => t.id !== id);
+
+        if (id === activeTabId) {
+            // Switch to previous tab or next tab
+            const newIndex = Math.max(0, index - 1);
+            activeTabId = tabs[newIndex].id;
+        }
+
+        // Just update UI, content loading happens in switchTab logic or explicit set
+        // But here we need to ensure the displayed content is correct if we switched
+        const activeTab = tabs.find(t => t.id === activeTabId);
+        textarea.value = activeTab.content;
+
+        saveState();
+        renderTabs();
+        updateCountsAndPreview();
+    };
+
+    addTabBtn.addEventListener('click', addTab);
+
+    // Update current tab content on input
+    textarea.addEventListener('input', () => {
+        const currentTab = tabs.find(t => t.id === activeTabId);
+        if (currentTab) {
+            currentTab.content = textarea.value;
+            // Update title dynamically if needed (optional, maybe distracting)
+            const firstLine = currentTab.content.split('\n')[0].trim();
+            if (firstLine.startsWith('# ')) {
+                currentTab.title = firstLine.substring(2).trim() || 'Untitled';
+                // Find the specific tab element and update text to avoid full re-render
+                const tabEl = Array.from(tabsList.children).find((el, index) => tabs[index].id === activeTabId);
+                if (tabEl) tabEl.querySelector('.tab-title').textContent = currentTab.title;
+            }
+            saveState();
+        }
+    });
+
+    // Initial Render
+    renderTabs();
+    textarea.value = tabs.find(t => t.id === activeTabId).content;
+
 
     // Markdown Detection Regex
     const markdownRegex = /^(# |\* |- |> |`|```)/m;
@@ -198,7 +340,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Context Menu & Rename Logic
+    const contextMenu = document.getElementById('context-menu');
+    const renameOption = document.getElementById('rename-option');
+    const renameModal = document.getElementById('rename-modal');
+    const renameInput = document.getElementById('rename-input');
+    const confirmRename = document.getElementById('confirm-rename');
+    const cancelRename = document.getElementById('cancel-rename');
+
+    let contextMenuTabId = null;
+
+    // Hide context menu on click elsewhere
+    document.addEventListener('click', (e) => {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.style.display = 'none';
+        }
+    });
+
+    // Helper to open rename modal
+    const openRenameModal = (id) => {
+        contextMenuTabId = id;
+        const tab = tabs.find(t => t.id === id);
+        if (tab) {
+            renameInput.value = tab.title;
+            renameModal.style.display = 'flex';
+            renameInput.focus();
+            renameInput.select();
+        }
+        contextMenu.style.display = 'none';
+    };
+
+    // Rename Option Click
+    renameOption.addEventListener('click', () => {
+        if (contextMenuTabId) {
+            openRenameModal(contextMenuTabId);
+        }
+    });
+
+    // Modal Actions
+    const closeRenameModal = () => {
+        renameModal.style.display = 'none';
+        contextMenuTabId = null;
+    };
+
+    cancelRename.addEventListener('click', closeRenameModal);
+
+    const performRename = () => {
+        if (contextMenuTabId && renameInput.value.trim()) {
+            const tab = tabs.find(t => t.id === contextMenuTabId);
+            if (tab) {
+                tab.title = renameInput.value.trim();
+                saveState();
+                renderTabs();
+            }
+        }
+        closeRenameModal();
+    };
+
+    confirmRename.addEventListener('click', performRename);
+
+    renameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') performRename();
+        if (e.key === 'Escape') closeRenameModal();
+    });
+
+    renameModal.addEventListener('click', (e) => {
+        if (e.target === renameModal) closeRenameModal();
+    });
+
     // Also hide on scroll to avoid detached popup
     textarea.addEventListener('scroll', hidePopup);
     window.addEventListener('resize', hidePopup);
 });
+

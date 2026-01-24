@@ -42,12 +42,20 @@
         </header>
 
         <main>
-            <div class="editor-wrapper">
-                <div class="editor-container">
-                    <textarea id="notepad" placeholder="Start typing your notes here..."></textarea>
+            <div class="notepad-interface">
+                <div class="tabs-container">
+                    <div class="tabs-list" id="tabs-list"></div>
+                    <div class="tabs-spacer" id="tabs-spacer">
+                        <button id="add-tab-btn" class="add-tab-btn" aria-label="Add Tab">+</button>
+                    </div>
                 </div>
-                <div class="preview-container" id="preview-pane">
-                    <!-- Markdown preview will be rendered here -->
+                <div class="editor-wrapper">
+                    <div class="editor-container">
+                        <textarea id="notepad" placeholder="Start typing your notes here..."></textarea>
+                    </div>
+                    <div class="preview-container" id="preview-pane">
+                        <!-- Markdown preview will be rendered here -->
+                    </div>
                 </div>
             </div>
 
@@ -74,6 +82,23 @@
             <span class="popup-value" id="popup-char-count-no-spaces">0</span>
         </div>
     </div>
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu">
+        <div class="menu-item" id="rename-option">Rename</div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="rename-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Rename Tab</h3>
+            <input type="text" id="rename-input" placeholder="New tab name" autocomplete="off">
+            <div class="modal-actions">
+                <button id="cancel-rename" class="modal-btn secondary">Cancel</button>
+                <button id="confirm-rename" class="modal-btn primary">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 
