@@ -308,7 +308,7 @@ input:checked+.slider:before {
 .tabs-list {
     display: flex;
     align-items: flex-end;
-    gap: -8px;
+    gap: 0;
     overflow-x: auto;
     /* Allow scrolling if needed, but hide bar */
     padding-bottom: 0;
@@ -356,22 +356,17 @@ input:checked+.slider:before {
     position: relative;
     user-select: none;
     box-shadow: -4px 0 10px -4px rgba(0, 0, 0, 0.1);
-    margin-right: -10px;
-    mask-image: linear-gradient(to right, black 90%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
     z-index: 1;
 }
 
-.tab-item:hover,
-.tab-item.active {
-    mask-image: none;
-    -webkit-mask-image: none;
+.tab-item:last-child {
+    margin-right: 0;
 }
 
 .tab-item:hover {
     opacity: 1;
     background-color: var(--editor-bg);
-    transform: translateY(-2px);
+    padding-bottom: 10px;
     z-index: 15;
 }
 

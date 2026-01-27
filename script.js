@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabsList = document.getElementById('tabs-list');
     const addTabBtn = document.getElementById('add-tab-btn');
 
+
+
     // Tab State Management
     let tabs = JSON.parse(localStorage.getItem('notepad-tabs')) || [
         { id: Date.now(), title: 'Untitled 1', content: '' }
