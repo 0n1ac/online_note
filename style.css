@@ -85,6 +85,56 @@
     --popup-bg: #111111;
 }
 
+[data-theme="gradient-midnight"] {
+    --bg-color: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    --text-color: #e2e8f0;
+    --editor-bg: rgba(30, 41, 59, 0.7);
+    --editor-text: #cbd5e1;
+    --accent-color: #818cf8;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --popup-bg: rgba(15, 23, 42, 0.95);
+}
+
+[data-theme="gradient-solar"] {
+    --bg-color: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+    --text-color: #0c4a6e;
+    --editor-bg: rgba(255, 255, 255, 0.6);
+    --editor-text: #075985;
+    --accent-color: #0ea5e9;
+    --shadow-color: rgba(14, 165, 233, 0.15);
+    --popup-bg: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="gradient-lavender"] {
+    --bg-color: linear-gradient(135deg, #e0c3fc 0%, #d4a7f7 50%, #ad5389 100%);
+    --text-color: #4a044e;
+    --editor-bg: rgba(255, 255, 255, 0.5);
+    --editor-text: #4a044e;
+    --accent-color: #c026d3;
+    --shadow-color: rgba(192, 38, 211, 0.15);
+    --popup-bg: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="gradient-mint"] {
+    --bg-color: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+    --text-color: #064e3b;
+    --editor-bg: rgba(255, 255, 255, 0.6);
+    --editor-text: #064e3b;
+    --accent-color: #059669;
+    --shadow-color: rgba(5, 150, 105, 0.15);
+    --popup-bg: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="gradient-fire"] {
+    --bg-color: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --text-color: #450a0a;
+    --editor-bg: rgba(255, 255, 255, 0.55);
+    --editor-text: #450a0a;
+    --accent-color: #dc2626;
+    --shadow-color: rgba(220, 38, 38, 0.2);
+    --popup-bg: rgba(255, 255, 255, 0.95);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -300,6 +350,27 @@ input:checked+.slider:before {
     --swatch-border: #39ff14;
 }
 
+.theme-btn[data-theme="gradient-midnight"] {
+    --swatch: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    --swatch-border: #818cf8;
+}
+
+.theme-btn[data-theme="gradient-solar"] {
+    --swatch: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+}
+
+.theme-btn[data-theme="gradient-lavender"] {
+    --swatch: linear-gradient(135deg, #d4a7f7 0%, #ad5389 100%);
+}
+
+.theme-btn[data-theme="gradient-mint"] {
+    --swatch: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+}
+
+.theme-btn[data-theme="gradient-fire"] {
+    --swatch: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
 /* Notepad Interface Layout */
 .notepad-interface {
     display: flex;
@@ -399,7 +470,7 @@ input:checked+.slider:before {
     user-select: none;
     box-shadow: 0 6px 12px -12px var(--shadow-color);
     overflow: hidden;
-    transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.32s ease, margin 0.32s ease, padding 0.32s ease;
+    transition: opacity 0.18s ease 0.12s;
 }
 
 .tab-item:last-child {
@@ -421,11 +492,15 @@ input:checked+.slider:before {
 
 .tab-item.closing {
     opacity: 0;
-    transform: scale(0.96) translateY(3px);
-    max-width: 0;
-    padding-left: 0;
-    padding-right: 0;
-    margin-right: 0;
+}
+
+.tab-title {
+    transition: opacity 0.12s ease;
+}
+
+.tab-item.closing .tab-title,
+.tab-item.closing .tab-close {
+    opacity: 0 !important;
 }
 
 /* Ensure editor has no top radius to match (will target in editor-container) */

@@ -41,12 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render Tabs
     const renderTabs = () => {
         tabsList.innerHTML = '';
-        tabs.forEach((tab, index) => {
+        tabs.forEach((tab) => {
             const tabEl = document.createElement('div');
             tabEl.className = `tab-item ${tab.id === activeTabId ? 'active' : ''}`;
 
-            // Only show close button for tabs other than the first one
-            const closeBtnHtml = index > 0 ? `<span class="tab-close" data-id="${tab.id}">×</span>` : '';
+            // Show close button only when there is more than one tab
+            const closeBtnHtml = tabs.length > 1 ? `<span class="tab-close" data-id="${tab.id}">×</span>` : '';
 
             tabEl.innerHTML = `
                 <span class="tab-title">${tab.title}</span>
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Close tab (only if button exists)
-            if (index > 0) {
+            if (tabs.length > 1) {
                 tabEl.querySelector('.tab-close').addEventListener('click', (e) => {
                     e.stopPropagation();
                     requestCloseTab(tab.id);
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabEl.classList.add('closing');
         setTimeout(() => {
             closeTab(id);
-        }, 320);
+        }, 300);
     };
 
     addTabBtn.addEventListener('click', addTab);
