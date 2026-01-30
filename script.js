@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabEl.classList.add('closing');
         setTimeout(() => {
             closeTab(id);
-        }, 220);
+        }, 320);
     };
 
     addTabBtn.addEventListener('click', addTab);
