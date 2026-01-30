@@ -14,15 +14,14 @@
 
 <body>
     <div class="app-container">
+        <!-- Resize Handles -->
+        <div class="resize-handle resize-handle-left"></div>
+        <div class="resize-handle resize-handle-right"></div>
+        <div class="resize-handle resize-handle-top"></div>
+        <div class="resize-handle resize-handle-bottom"></div>
+
         <header>
             <h1>Notepad</h1>
-            <div class="toggle-container">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="split-toggle" checked>
-                    <span class="slider round"></span>
-                </label>
-                <span class="toggle-label">Auto Split</span>
-            </div>
             <div class="theme-selector">
                 <button class="theme-btn" data-theme="light" aria-label="Light Theme" title="Light"></button>
                 <button class="theme-btn" data-theme="dark" aria-label="Dark Theme" title="Dark"></button>
@@ -40,15 +39,17 @@
                     title="Neon Night"></button>
             </div>
         </header>
+        <div class="tabs-bar">
+            <button class="tabs-scroll-btn" id="tabs-scroll-left" aria-label="Scroll tabs left">&lt;</button>
+            <div class="tabs-strip">
+                <div class="tabs-list" id="tabs-list"></div>
+            </div>
+            <button id="add-tab-btn" class="add-tab-btn" aria-label="Add Tab">+</button>
+            <button class="tabs-scroll-btn" id="tabs-scroll-right" aria-label="Scroll tabs right">&gt;</button>
+        </div>
 
         <main>
             <div class="notepad-interface">
-                <div class="tabs-container">
-                    <div class="tabs-list" id="tabs-list"></div>
-                    <div class="tabs-spacer" id="tabs-spacer">
-                        <button id="add-tab-btn" class="add-tab-btn" aria-label="Add Tab">+</button>
-                    </div>
-                </div>
                 <div class="editor-wrapper">
                     <div class="editor-container">
                         <textarea id="notepad" placeholder="Start typing your notes here..."></textarea>
@@ -60,14 +61,25 @@
             </div>
 
             <div class="stats-bar">
-
-                <div class="stat-item">
-                    <span class="stat-label">Characters (with spaces)</span>
-                    <span class="stat-value" id="char-count-all">0</span>
+                <div class="stats-left">
+                    <div class="toggle-container">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="split-toggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <span class="toggle-label">Auto Split</span>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label">Characters (no spaces)</span>
-                    <span class="stat-value" id="char-count-no-spaces">0</span>
+
+                <div class="stats-right">
+                    <div class="stat-item">
+                        <span class="stat-label">Characters (with spaces)</span>
+                        <span class="stat-value" id="char-count-all">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Characters (no spaces)</span>
+                        <span class="stat-value" id="char-count-no-spaces">0</span>
+                    </div>
                 </div>
             </div>
         </main>
@@ -96,6 +108,18 @@
             <div class="modal-actions">
                 <button id="cancel-rename" class="modal-btn secondary">Cancel</button>
                 <button id="confirm-rename" class="modal-btn primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Close Tab Modal -->
+    <div id="close-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Close Tab</h3>
+            <p class="modal-text">Are you sure you want to close this tab? Its contents will be lost.</p>
+            <div class="modal-actions">
+                <button id="cancel-close" class="modal-btn secondary">Cancel</button>
+                <button id="confirm-close" class="modal-btn primary">Close</button>
             </div>
         </div>
     </div>

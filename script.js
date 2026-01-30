@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const splitToggle = document.getElementById('split-toggle');
     const tabsList = document.getElementById('tabs-list');
     const addTabBtn = document.getElementById('add-tab-btn');
+    const tabsScrollLeft = document.getElementById('tabs-scroll-left');
+    const tabsScrollRight = document.getElementById('tabs-scroll-right');
 
 
 
@@ -27,6 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveState = () => {
         localStorage.setItem('notepad-tabs', JSON.stringify(tabs));
         localStorage.setItem('notepad-active-tab', activeTabId);
+    };
+
+    const updateTabsScrollButtons = () => {
+        if (!tabsScrollLeft || !tabsScrollRight) return;
+        const maxScroll = tabsList.scrollWidth - tabsList.clientWidth;
+        tabsScrollLeft.disabled = tabsList.scrollLeft <= 0;
+        tabsScrollRight.disabled = tabsList.scrollLeft >= maxScroll - 1;
     };
 
     // Render Tabs
@@ -66,12 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index > 0) {
                 tabEl.querySelector('.tab-close').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    closeTab(tab.id);
+                    requestCloseTab(tab.id);
                 });
             }
 
             tabsList.appendChild(tabEl);
         });
+
+        requestAnimationFrame(updateTabsScrollButtons);
     };
 
     // Switch Tab
@@ -110,11 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close Tab
     const closeTab = (id) => {
-        if (tabs.length === 1) {
-            alert('Cannot close the last tab.');
-            return;
-        }
-
         const index = tabs.findIndex(t => t.id === id);
         tabs = tabs.filter(t => t.id !== id);
 
@@ -134,7 +140,41 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCountsAndPreview();
     };
 
+    const closeTabWithAnimation = (id) => {
+        const tabEl = Array.from(tabsList.children).find((el, index) => tabs[index]?.id === id);
+        if (!tabEl) {
+            closeTab(id);
+            return;
+        }
+
+        tabEl.classList.add('closing');
+        setTimeout(() => {
+            closeTab(id);
+        }, 220);
+    };
+
     addTabBtn.addEventListener('click', addTab);
+
+    const requestCloseTab = (id) => {
+        if (tabs.length === 1) {
+            alert('Cannot close the last tab.');
+            return;
+        }
+        openCloseModal(id);
+    };
+
+    const scrollTabs = (direction) => {
+        const amount = Math.max(120, tabsList.clientWidth * 0.6);
+        tabsList.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    };
+
+    if (tabsScrollLeft && tabsScrollRight) {
+        tabsScrollLeft.addEventListener('click', () => scrollTabs(-1));
+        tabsScrollRight.addEventListener('click', () => scrollTabs(1));
+        tabsList.addEventListener('scroll', updateTabsScrollButtons);
+        window.addEventListener('resize', updateTabsScrollButtons);
+        requestAnimationFrame(updateTabsScrollButtons);
+    }
 
     // Update current tab content on input
     textarea.addEventListener('input', () => {
@@ -336,6 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Textarea interaction
     textarea.addEventListener('mouseup', handleSelection);
+    textarea.addEventListener('keydown', (e) => {
+        if (['Shift', 'Alt', 'Control', 'Meta'].includes(e.key)) return;
+        hidePopup();
+    });
 
     // Hide if clicking elsewhere
     document.addEventListener('mousedown', (e) => {
@@ -355,8 +399,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const renameInput = document.getElementById('rename-input');
     const confirmRename = document.getElementById('confirm-rename');
     const cancelRename = document.getElementById('cancel-rename');
+    const closeModal = document.getElementById('close-modal');
+    const confirmClose = document.getElementById('confirm-close');
+    const cancelClose = document.getElementById('cancel-close');
 
     let contextMenuTabId = null;
+    let pendingCloseTabId = null;
+
+    const openCloseModal = (id) => {
+        pendingCloseTabId = id;
+        closeModal.style.display = 'flex';
+    };
+
+    const closeCloseModal = () => {
+        closeModal.style.display = 'none';
+        pendingCloseTabId = null;
+    };
 
     // Hide context menu on click elsewhere
     document.addEventListener('click', (e) => {
@@ -416,8 +474,192 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === renameModal) closeRenameModal();
     });
 
+    const performCloseTab = () => {
+        if (!pendingCloseTabId) return;
+        closeTabWithAnimation(pendingCloseTabId);
+        closeCloseModal();
+    };
+
+    confirmClose.addEventListener('click', performCloseTab);
+    cancelClose.addEventListener('click', closeCloseModal);
+
+    closeModal.addEventListener('click', (e) => {
+        if (e.target === closeModal) closeCloseModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && closeModal.style.display === 'flex') {
+            closeCloseModal();
+        }
+    });
+
+
     // Also hide on scroll to avoid detached popup
     textarea.addEventListener('scroll', hidePopup);
     window.addEventListener('resize', hidePopup);
-});
 
+    // Symmetric Resizing Logic
+    const initResize = () => {
+        const resizeHandles = {
+            left: document.querySelector('.resize-handle-left'),
+            right: document.querySelector('.resize-handle-right'),
+            top: document.querySelector('.resize-handle-top'),
+            bottom: document.querySelector('.resize-handle-bottom')
+        };
+
+        const appContainer = document.querySelector('.app-container');
+        const header = appContainer.querySelector('header');
+        const main = appContainer.querySelector('main');
+        const statsBar = appContainer.querySelector('.stats-bar');
+        const editorWrapper = appContainer.querySelector('.editor-wrapper');
+        let isResizing = false;
+        let currentHandle = null;
+        let startX = 0;
+        let startY = 0;
+        let startWidth = 0;
+        let startHeight = 0;
+        let minWidth = 320;
+        let minHeight = 0;
+        const edgeThreshold = 24;
+        const isBlockedResizeTarget = (target) => !!target.closest(
+            'button, .tabs-bar, .tab-item, .tab-close, .tab-title, .theme-selector, .stats-bar'
+        );
+
+        const getMaxHeight = () => {
+            const bodyStyles = getComputedStyle(document.body);
+            const paddingTop = parseFloat(bodyStyles.paddingTop) || 0;
+            const paddingBottom = parseFloat(bodyStyles.paddingBottom) || 0;
+            return window.innerHeight - paddingTop - paddingBottom;
+        };
+
+        const getMinHeight = () => {
+            const headerHeight = header ? header.getBoundingClientRect().height : 0;
+            const statsHeight = statsBar ? statsBar.getBoundingClientRect().height : 0;
+            const containerGap = parseFloat(getComputedStyle(appContainer).gap) || 0;
+            const mainGap = main ? (parseFloat(getComputedStyle(main).gap) || 0) : 0;
+            const editorMinHeight = editorWrapper
+                ? parseFloat(getComputedStyle(editorWrapper).minHeight) || 0
+                : 0;
+
+            return headerHeight + statsHeight + containerGap + mainGap + editorMinHeight;
+        };
+
+        const startResize = (e, handleType) => {
+            e.preventDefault();
+            isResizing = true;
+            currentHandle = handleType;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            const rect = appContainer.getBoundingClientRect();
+            startWidth = rect.width;
+            startHeight = rect.height;
+            minHeight = getMinHeight();
+
+            document.body.style.userSelect = 'none'; // Prevent text selection
+            document.body.style.cursor = (handleType === 'left' || handleType === 'right') ? 'ew-resize' : 'ns-resize';
+        };
+
+        const stopResize = () => {
+            if (!isResizing) return;
+            isResizing = false;
+            currentHandle = null;
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+        };
+
+        const getHandleFromPoint = (e) => {
+            const rect = appContainer.getBoundingClientRect();
+            const editorRect = editorWrapper.getBoundingClientRect();
+            const nearLeft = e.clientX - rect.left <= edgeThreshold;
+            const nearRight = rect.right - e.clientX <= edgeThreshold;
+            const nearTop = e.clientY - editorRect.top <= edgeThreshold;
+            const nearBottom = editorRect.bottom - e.clientY <= edgeThreshold;
+            const nearBottomContainer = rect.bottom - e.clientY <= edgeThreshold;
+
+            if (nearLeft) return 'left';
+            if (nearRight) return 'right';
+            if (nearTop) return 'top';
+            if (nearBottom || nearBottomContainer) return 'bottom';
+            return null;
+        };
+
+        const updateCursor = (e) => {
+            if (isResizing) return;
+            if (isBlockedResizeTarget(e.target)) {
+                document.body.style.cursor = '';
+                return;
+            }
+            const handleType = getHandleFromPoint(e);
+            if (handleType === 'left' || handleType === 'right') {
+                document.body.style.cursor = 'ew-resize';
+            } else if (handleType === 'top' || handleType === 'bottom') {
+                document.body.style.cursor = 'ns-resize';
+            } else {
+                document.body.style.cursor = '';
+            }
+        };
+
+        const handleResize = (e) => {
+            if (!isResizing) return;
+
+            if (currentHandle === 'right') {
+                const delta = e.clientX - startX;
+                const newWidth = startWidth + (delta * 2);
+                appContainer.style.width = `${Math.max(minWidth, newWidth)}px`;
+                appContainer.style.maxWidth = 'none'; // Allow expansion beyond CSS limit
+            } else if (currentHandle === 'left') {
+                const delta = startX - e.clientX;
+                const newWidth = startWidth + (delta * 2);
+                appContainer.style.width = `${Math.max(minWidth, newWidth)}px`;
+                appContainer.style.maxWidth = 'none';
+            } else if (currentHandle === 'bottom') {
+                const delta = e.clientY - startY;
+                const newHeight = startHeight + (delta * 2);
+                const maxHeight = getMaxHeight();
+                appContainer.style.height = `${Math.min(Math.max(minHeight, newHeight), maxHeight)}px`;
+                appContainer.style.maxHeight = 'none';
+            } else if (currentHandle === 'top') {
+                const delta = startY - e.clientY;
+                const newHeight = startHeight + (delta * 2);
+                const maxHeight = getMaxHeight();
+                appContainer.style.height = `${Math.min(Math.max(minHeight, newHeight), maxHeight)}px`;
+                appContainer.style.maxHeight = 'none';
+            }
+        };
+
+        // Attach listeners
+        resizeHandles.left.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            startResize(e, 'left');
+        });
+        resizeHandles.right.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            startResize(e, 'right');
+        });
+        resizeHandles.top.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            startResize(e, 'top');
+        });
+        resizeHandles.bottom.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            startResize(e, 'bottom');
+        });
+
+        appContainer.addEventListener('mousemove', updateCursor);
+        appContainer.addEventListener('mouseleave', () => {
+            if (!isResizing) document.body.style.cursor = '';
+        });
+        appContainer.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.resize-handle')) return;
+            if (isBlockedResizeTarget(e.target)) return;
+            const handleType = getHandleFromPoint(e);
+            if (handleType) startResize(e, handleType);
+        }, true);
+
+        window.addEventListener('mousemove', handleResize);
+        window.addEventListener('mouseup', stopResize);
+    };
+
+    initResize();
+});

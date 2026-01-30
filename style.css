@@ -116,6 +116,9 @@ body[data-theme*="gradient"] {
     flex-direction: column;
     gap: 20px;
     transition: max-width 0.3s ease;
+    position: relative;
+    /* For resize handles */
+    min-height: 0;
 }
 
 header {
@@ -139,8 +142,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-right: auto;
-    margin-left: 20px;
+    margin: 0;
     padding: 6px 12px;
     background: rgba(var(--editor-bg), 0.5);
     /* Adaptive background */
@@ -228,10 +230,30 @@ input:checked+.slider:before {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    border: 2px solid transparent;
+    border: none;
     cursor: pointer;
     transition: transform 0.2s ease, border-color 0.2s ease;
     padding: 0;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.theme-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--swatch, #ffffff);
+    box-shadow: inset 0 0 0 1px var(--swatch-border, transparent);
+}
+
+.theme-btn:focus-visible {
+    box-shadow: 0 0 0 2px var(--text-color);
 }
 
 .theme-btn:hover {
@@ -239,43 +261,43 @@ input:checked+.slider:before {
 }
 
 .theme-btn.active {
-    border-color: var(--text-color);
+    box-shadow: 0 0 0 2px var(--text-color);
     transform: scale(1.1);
 }
 
 /* Theme Button Colors */
 .theme-btn[data-theme="light"] {
-    background-color: #f3f4f6;
-    border: 1px solid #d1d5db;
+    --swatch: #f3f4f6;
+    --swatch-border: #d1d5db;
 }
 
 .theme-btn[data-theme="dark"] {
-    background-color: #1f2937;
+    --swatch: #1f2937;
 }
 
 .theme-btn[data-theme="gradient-blue"] {
-    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    --swatch: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
 }
 
 .theme-btn[data-theme="gradient-purple"] {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --swatch: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .theme-btn[data-theme="gradient-sunset"] {
-    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    --swatch: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
 }
 
 .theme-btn[data-theme="gradient-ocean"] {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --swatch: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
 .theme-btn[data-theme="gradient-forest"] {
-    background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
+    --swatch: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
 }
 
 .theme-btn[data-theme="neon-night"] {
-    background-color: #000000;
-    border: 1px solid #39ff14;
+    --swatch: #000000;
+    --swatch-border: #39ff14;
 }
 
 /* Notepad Interface Layout */
@@ -284,79 +306,100 @@ input:checked+.slider:before {
     flex-direction: column;
     width: 100%;
     /* No gap here to ensure tabs touch editor */
+    flex: 1;
+    min-height: 0;
 }
 
-/* Tabs Styles */
-/* Tabs Styles */
-.tabs-container {
+/* Tabs Bar */
+.tabs-bar {
     display: flex;
-    /* Enforce horizontal layout */
-    align-items: flex-end;
-    /* Align items to bottom */
-    padding: 0 10px 0 0;
-    /* Remove left padding to align with editor */
-    z-index: 10;
-    width: 100%;
-    position: relative;
-    /* Ensure tabs sit on top of editor border */
-    margin-bottom: -1px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--editor-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 8px 16px -12px var(--shadow-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     flex-shrink: 0;
-    /* Prevent collapsing */
+    width: 100%;
+    align-self: stretch;
+}
+
+.tabs-strip {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 /* Scrollable part of tabs */
 .tabs-list {
     display: flex;
-    align-items: flex-end;
-    gap: 0;
+    align-items: center;
+    gap: 8px;
     overflow-x: auto;
-    /* Allow scrolling if needed, but hide bar */
-    padding-bottom: 0;
-    z-index: 10;
-    flex-shrink: 0;
-    max-width: 90%;
-    /* Leave space for spacer if needed, but flex should handle it */
+    padding: 4px 2px;
+    scroll-behavior: smooth;
 }
 
-.tabs-list::-webkit-scrollbar {
-    display: none;
-}
-
-.tabs-spacer {
-    flex-grow: 1;
-    /* Take remaining space */
-    min-width: 40px;
-    /* Ensure space for button */
-    height: 38px;
+.tabs-scroll-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
     display: flex;
     align-items: center;
-    padding-left: 10px;
-    align-self: flex-end;
-    padding-bottom: 4px;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+    box-shadow: 0 6px 12px -12px var(--shadow-color);
+}
+
+.tabs-scroll-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0));
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px -12px var(--shadow-color);
+}
+
+.tabs-scroll-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    border-color: var(--border-color);
+    color: var(--text-color);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: none;
 }
 
 .tab-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px 8px;
+    padding: 8px 14px;
     background-color: var(--editor-bg);
     border: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-    /* Default has bottom border */
-    border-radius: 12px 12px 0 0;
+    border-radius: 999px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-color);
-    opacity: 0.7;
+    opacity: 0.8;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: 120px;
-    max-width: 220px;
+    min-width: 100px;
+    max-width: 200px;
     position: relative;
     user-select: none;
-    box-shadow: -4px 0 10px -4px rgba(0, 0, 0, 0.1);
-    z-index: 1;
+    box-shadow: 0 6px 12px -12px var(--shadow-color);
+    overflow: hidden;
+    transition: opacity 0.18s ease, transform 0.2s ease, max-width 0.22s ease, margin 0.22s ease, padding 0.22s ease;
 }
 
 .tab-item:last-child {
@@ -365,20 +408,24 @@ input:checked+.slider:before {
 
 .tab-item:hover {
     opacity: 1;
-    background-color: var(--editor-bg);
-    padding-bottom: 10px;
-    z-index: 15;
+    border-color: var(--accent-color);
 }
 
 .tab-item.active {
     opacity: 1;
     background-color: var(--editor-bg);
-    border-bottom: 1px solid var(--editor-bg);
-    /* Match bg to hide border */
-    z-index: 20;
+    border-color: var(--accent-color);
     font-weight: 600;
-    padding-bottom: 9px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 16px -12px var(--shadow-color);
+}
+
+.tab-item.closing {
+    opacity: 0;
+    transform: scale(0.9) translateY(2px);
+    max-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 0;
 }
 
 /* Ensure editor has no top radius to match (will target in editor-container) */
@@ -417,57 +464,49 @@ input:checked+.slider:before {
 
 /* Animated Add Button */
 .add-tab-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    height: 30px;
+    min-width: 48px;
+    padding: 0 12px;
+    border-radius: 999px;
     border: 1px solid var(--border-color);
     background-color: var(--editor-bg);
     color: var(--text-color);
-    font-size: 1.4rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-
-    /* Animation props */
-    opacity: 0;
-    transform: scale(0.8);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    /* Pop in */
-    margin-left: 0;
-    /* Align left in spacer */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    pointer-events: none;
-    /* Ignore clicks when hidden */
-}
-
-/* Trigger animation only when hovering the SPACER (empty area) */
-.tabs-spacer:hover .add-tab-btn {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 12px -12px var(--shadow-color);
 }
 
 .add-tab-btn:hover {
     background-color: var(--accent-color);
     color: white;
     border-color: var(--accent-color);
-    transform: scale(1.1) rotate(90deg) !important;
+    transform: scale(1.03);
 }
 
 main {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
 }
 
 .editor-wrapper {
     display: flex;
-    gap: 20px;
+    gap: 0;
     width: 100%;
     height: 60vh;
     min-height: 400px;
     transition: all 0.3s ease;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .editor-container {
@@ -476,6 +515,8 @@ main {
     height: 100%;
     flex: 1;
     transition: all 0.3s ease;
+    min-width: 0;
+    min-height: 0;
 }
 
 .preview-container {
@@ -497,6 +538,8 @@ main {
     /* Premium ease-out */
     white-space: nowrap;
     /* Prevent text wrapping during animation */
+    min-width: 0;
+    min-height: 0;
 }
 
 /* Split View Active State */
@@ -509,6 +552,10 @@ main {
     white-space: normal;
     overflow-y: auto;
     /* Enable scrolling when active */
+}
+
+.app-container.split-view .editor-wrapper {
+    gap: 20px;
 }
 
 textarea {
@@ -528,8 +575,6 @@ textarea {
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    /* Remove top-left radius to connect with tab */
-    border-top-left-radius: 0;
 }
 
 
@@ -600,6 +645,13 @@ textarea {
     margin: 0;
     font-size: 1.2rem;
     color: var(--text-color);
+}
+
+.modal-text {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--text-color);
+    opacity: 0.85;
 }
 
 .modal-content input {
@@ -715,9 +767,22 @@ textarea::placeholder {
 
 .stats-bar {
     display: flex;
-    justify-content: flex-end;
-    gap: 24px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     padding: 0 10px;
+    flex-shrink: 0;
+}
+
+.stats-left {
+    display: flex;
+    align-items: center;
+}
+
+.stats-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
 .stat-item {
@@ -834,4 +899,69 @@ textarea::placeholder {
     width: 1px;
     height: 24px;
     background-color: var(--border-color);
+}
+
+/* Resize Handles */
+.resize-handle {
+    position: absolute;
+    z-index: 100;
+    transition: background-color 0.2s;
+}
+
+.resize-handle:hover {
+    background-color: rgba(var(--accent-color), 0.5);
+    /* Highlight on hover for indication */
+}
+
+.resize-handle-left {
+    top: 0;
+    bottom: 0;
+    left: -10px;
+    width: 20px;
+    cursor: ew-resize;
+}
+
+.resize-handle-right {
+    top: 0;
+    bottom: 0;
+    right: -10px;
+    width: 20px;
+    cursor: ew-resize;
+}
+
+.resize-handle-top {
+    left: 0;
+    right: 0;
+    top: -10px;
+    height: 20px;
+    cursor: ns-resize;
+}
+
+.resize-handle-bottom {
+    left: 0;
+    right: 0;
+    bottom: -10px;
+    height: 20px;
+    cursor: ns-resize;
+}
+
+/* Hide Scrollbars globally or specific elements */
+.tabs-list::-webkit-scrollbar,
+textarea::-webkit-scrollbar,
+.preview-container::-webkit-scrollbar,
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.tabs-list,
+textarea,
+.preview-container,
+body,
+html {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
