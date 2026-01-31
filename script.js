@@ -2,7 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const textarea = document.getElementById('notepad');
     const charCountAll = document.getElementById('char-count-all');
     const charCountNoSpaces = document.getElementById('char-count-no-spaces');
-    const themeBtns = document.querySelectorAll('.theme-btn');
+    const themeSelector = document.querySelector('.theme-selector');
+    const themeBtns = Array.from(document.querySelectorAll('.theme-btn'));
+    const themeToast = document.getElementById('theme-toast');
+    const themeToastText = document.getElementById('theme-toast-text');
     const body = document.body;
     const appContainer = document.querySelector('.app-container');
     const previewPane = document.getElementById('preview-pane');
@@ -241,6 +244,49 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCountsAndPreview();
 
     // Theme Switching Logic
+    const themeOrder = themeBtns.map(btn => btn.dataset.theme);
+    const themeBtnMap = new Map(themeBtns.map(btn => [btn.dataset.theme, btn]));
+
+    const getRecentThemes = () => {
+        try {
+            const stored = JSON.parse(localStorage.getItem('notepad-recent-themes')) || [];
+            return stored.filter((t) => themeBtnMap.has(t));
+        } catch {
+            return [];
+        }
+    };
+
+    const updateRecentThemes = (theme) => {
+        const recent = getRecentThemes();
+        const next = [theme, ...recent.filter((t) => t !== theme)].slice(0, 5);
+        localStorage.setItem('notepad-recent-themes', JSON.stringify(next));
+        return next;
+    };
+
+    const updateThemeOrder = (recent) => {
+        if (!themeSelector) return;
+        const recentSet = new Set(recent);
+        const ordered = [...recent, ...themeOrder.filter((t) => !recentSet.has(t))];
+        ordered.forEach((theme) => {
+            const btn = themeBtnMap.get(theme);
+            if (btn) themeSelector.appendChild(btn);
+        });
+    };
+
+    let themeToastTimer = null;
+
+    const showThemeToast = (theme) => {
+        if (!themeToast || !themeToastText) return;
+        const btn = themeBtnMap.get(theme);
+        const label = btn?.getAttribute('title') || theme;
+        themeToastText.textContent = label;
+        themeToast.classList.add('show');
+        if (themeToastTimer) clearTimeout(themeToastTimer);
+        themeToastTimer = setTimeout(() => {
+            themeToast.classList.remove('show');
+        }, 1200);
+    };
+
     const setTheme = (theme) => {
         // Remove all theme attributes first or just set the new one
         // Using data-attribute on body to control CSS variables
@@ -258,6 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.classList.remove('active');
             }
         });
+
+        const recent = updateRecentThemes(theme);
+        updateThemeOrder(recent);
+
+        showThemeToast(theme);
 
         // Save preference to localStorage
         localStorage.setItem('notepad-theme', theme);
