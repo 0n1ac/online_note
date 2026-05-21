@@ -2,153 +2,96 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Notepad</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Note — a quiet place to write</title>
+    <meta name="description" content="A mood-driven minimal writing surface. Experience a quiet place to write with 8 distinct aesthetic moods, markdown preview, auto-save, and distraction-free writing environment." />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=Geist:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <!-- Core Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Marked Library for Markdown Parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
-<body>
-    <div class="app-container">
-        <!-- Resize Handles -->
-        <div class="resize-handle resize-handle-left"></div>
-        <div class="resize-handle resize-handle-right"></div>
-        <div class="resize-handle resize-handle-top"></div>
-        <div class="resize-handle resize-handle-bottom"></div>
+<body data-mood="paper">
+    <!-- Subtle paper grain overlay tint per mood via mix-blend -->
+    <svg class="grain" aria-hidden="true" id="grain-svg">
+        <filter id="grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
+            <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#grain)" />
+    </svg>
 
-        <header>
-            <h1>Notepad</h1>
-            <div class="theme-selector">
-                <button class="theme-btn" data-theme="light" aria-label="Light Theme" title="Light"></button>
-                <button class="theme-btn" data-theme="dark" aria-label="Dark Theme" title="Dark"></button>
-                <button class="theme-btn" data-theme="dark-amber" aria-label="Amber Dark Theme"
-                    title="Amber Dark"></button>
-                <button class="theme-btn" data-theme="dark-forest" aria-label="Forest Dark Theme"
-                    title="Forest Dark"></button>
-
-                <!-- Warm Colors -->
-                <button class="theme-btn" data-theme="gradient-solar" aria-label="Solar Flare Theme"
-                    title="Solar Flare"></button>
-                <button class="theme-btn" data-theme="gradient-sunset" aria-label="Sunset Gradient Theme"
-                    title="Sunset Gradient"></button>
-                <button class="theme-btn" data-theme="gradient-fire" aria-label="Fire Glow Theme"
-                    title="Fire Glow"></button>
-
-                <!-- Purple/Blue Colors -->
-                <button class="theme-btn" data-theme="gradient-lavender" aria-label="Lavender Haze Theme"
-                    title="Lavender Haze"></button>
-                <button class="theme-btn" data-theme="gradient-purple" aria-label="Purple Gradient Theme"
-                    title="Purple Gradient"></button>
-                <button class="theme-btn" data-theme="gradient-blue" aria-label="Blue Gradient Theme"
-                    title="Blue Gradient"></button>
-                <button class="theme-btn" data-theme="gradient-midnight" aria-label="Midnight Dreams Theme"
-                    title="Midnight Dreams"></button>
-
-                <!-- Green/Teal Colors -->
-                <button class="theme-btn" data-theme="gradient-ocean" aria-label="Ocean Gradient Theme"
-                    title="Ocean Gradient"></button>
-                <button class="theme-btn" data-theme="gradient-mint" aria-label="Fresh Mint Theme"
-                    title="Fresh Mint"></button>
-                <button class="theme-btn" data-theme="gradient-forest" aria-label="Forest Gradient Theme"
-                    title="Forest Gradient"></button>
-                <button class="theme-btn" data-theme="neon-night" aria-label="Neon Night Theme"
-                    title="Neon Night"></button>
+    <div class="page" id="page">
+        <header class="masthead">
+            <div class="brand">
+                <div class="wordmark" id="app-logo"><em>note</em><span class="period">.</span></div>
+                <div class="sub" id="sub">
+                    <span class="mood-name" id="mood-name">Paper</span>
+                    <span class="dot">·</span>
+                    <span class="mood-note" id="mood-note">a warm white morning</span>
+                </div>
             </div>
+
+            <nav class="controls" aria-label="Note controls" id="controls-nav">
+                <div class="moods" role="radiogroup" aria-label="Mood" id="mood-selector">
+                    <button class="mood" role="radio" data-mood="paper" data-name="Paper" data-note="a warm white morning" aria-label="Paper"></button>
+                    <button class="mood" role="radio" data-mood="graphite" data-name="Graphite" data-note="late ink, low lamp" aria-label="Graphite"></button>
+                    <button class="mood" role="radio" data-mood="mist" data-name="Mist" data-note="soft blue, before rain" aria-label="Mist"></button>
+                    <button class="mood" role="radio" data-mood="lilac" data-name="Lilac" data-note="quiet hour, hazy purple" aria-label="Lilac"></button>
+                    <button class="mood" role="radio" data-mood="peach" data-name="Peach" data-note="six o'clock, golden" aria-label="Peach"></button>
+                    <button class="mood" role="radio" data-mood="meadow" data-name="Meadow" data-note="dew, just after sunrise" aria-label="Meadow"></button>
+                    <button class="mood" role="radio" data-mood="pine" data-name="Pine" data-note="deep woods, slow breath" aria-label="Pine"></button>
+                    <button class="mood" role="radio" data-mood="ember" data-name="Ember" data-note="cabin, last coal glowing" aria-label="Ember"></button>
+                </div>
+
+                <button class="split-toggle" id="split-toggle" aria-pressed="true" title="Toggle markdown preview">
+                    <span class="split-icon" aria-hidden="true">
+                        <span></span><span></span>
+                    </span>
+                    <span class="split-label">split</span>
+                </button>
+            </nav>
         </header>
-        <div class="tabs-bar">
-            <button class="tabs-scroll-btn" id="tabs-scroll-left" aria-label="Scroll tabs left">&lt;</button>
-            <div class="tabs-strip">
-                <div class="tabs-list" id="tabs-list"></div>
-            </div>
-            <button id="add-tab-btn" class="add-tab-btn" aria-label="Add Tab">+</button>
-            <button class="tabs-scroll-btn" id="tabs-scroll-right" aria-label="Scroll tabs right">&gt;</button>
-        </div>
 
-        <main>
-            <div class="notepad-interface">
-                <div class="editor-wrapper">
-                    <div class="editor-container">
-                        <textarea id="notepad" placeholder="Start typing your notes here..."></textarea>
-                    </div>
-                    <div class="preview-container" id="preview-pane">
-                        <!-- Markdown preview will be rendered here -->
-                    </div>
-                </div>
-            </div>
+        <main class="board" id="board">
+            <section class="sheet writing" aria-label="Writing" id="writing-pane">
+                <div class="sheet-rule"><span>writing</span></div>
+                <textarea id="notepad" spellcheck="true" autocomplete="off" placeholder="Begin here.&#10;&#10;The room is quiet. The page is patient.&#10;Markdown like **bold**, # headings, or - lists will quietly open a preview on the right."></textarea>
+            </section>
 
-            <div class="stats-bar">
-                <div class="stats-left">
-                    <div class="toggle-container">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="split-toggle" checked>
-                            <span class="slider round"></span>
-                        </label>
-                        <span class="toggle-label">Auto Split</span>
-                    </div>
-                </div>
-
-                <div class="stats-right">
-                    <div class="stat-item">
-                        <span class="stat-label">Characters (with spaces)</span>
-                        <span class="stat-value" id="char-count-all">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Characters (no spaces)</span>
-                        <span class="stat-value" id="char-count-no-spaces">0</span>
-                    </div>
-                </div>
-            </div>
+            <section class="sheet preview" id="preview" aria-label="Preview" aria-hidden="true">
+                <div class="sheet-rule"><span>preview</span></div>
+                <article class="preview-body" id="preview-body"></article>
+            </section>
         </main>
-    </div>
-    <div id="selection-popup" class="selection-popup">
-        <div class="popup-item">
-            <span class="popup-label">공백 포함</span>
-            <span class="popup-value" id="popup-char-count-all">0</span>
-        </div>
-        <div class="popup-divider"></div>
-        <div class="popup-item">
-            <span class="popup-label">공백 제외</span>
-            <span class="popup-value" id="popup-char-count-no-spaces">0</span>
-        </div>
-    </div>
-    <!-- Context Menu -->
-    <div id="context-menu" class="context-menu">
-        <div class="menu-item" id="rename-option">Rename</div>
-    </div>
 
-    <!-- Rename Modal -->
-    <div id="rename-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Rename Tab</h3>
-            <input type="text" id="rename-input" placeholder="New tab name" autocomplete="off">
-            <div class="modal-actions">
-                <button id="cancel-rename" class="modal-btn secondary">Cancel</button>
-                <button id="confirm-rename" class="modal-btn primary">Save</button>
+        <footer class="bench">
+            <div class="bench-left">
+                <span class="hint" id="status">at rest</span>
             </div>
-        </div>
-    </div>
-
-    <!-- Close Tab Modal -->
-    <div id="close-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Close Tab</h3>
-            <p class="modal-text">Are you sure you want to close this tab? Its contents will be lost.</p>
-            <div class="modal-actions">
-                <button id="cancel-close" class="modal-btn secondary">Cancel</button>
-                <button id="confirm-close" class="modal-btn primary">Close</button>
+            <div class="bench-right" id="stats-section">
+                <div class="stat" id="stat-all-chars">
+                    <span class="stat-num" id="char-all">0</span>
+                    <span class="stat-lbl">with spaces</span>
+                </div>
+                <div class="sep" aria-hidden="true"></div>
+                <div class="stat" id="stat-no-spaces">
+                    <span class="stat-num" id="char-no">0</span>
+                    <span class="stat-lbl">no spaces</span>
+                </div>
             </div>
-        </div>
+        </footer>
     </div>
 
-    <!-- Theme Toast -->
-    <div id="theme-toast" class="theme-toast">
-        <span id="theme-toast-text"></span>
-    </div>
-
+    <!-- Script Entrypoint -->
     <script src="script.js"></script>
 </body>
 
