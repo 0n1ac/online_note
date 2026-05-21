@@ -30,6 +30,12 @@
     </svg>
 
     <div class="page" id="page">
+        <!-- Resize Handles -->
+        <div class="resize-handle resize-handle-left"></div>
+        <div class="resize-handle resize-handle-right"></div>
+        <div class="resize-handle resize-handle-top"></div>
+        <div class="resize-handle resize-handle-bottom"></div>
+
         <header class="masthead">
             <div class="brand">
                 <div class="wordmark" id="app-logo"><em>note</em><span class="period">.</span></div>
@@ -62,6 +68,9 @@
         </header>
 
         <main class="board" id="board">
+            <!-- Index tabs — rendered by JS, positioned above the writing sheet -->
+            <div class="tab-index" id="tab-index"></div>
+
             <section class="sheet writing" aria-label="Writing" id="writing-pane">
                 <div class="sheet-rule"><span>writing</span></div>
                 <textarea id="notepad" spellcheck="true" autocomplete="off" placeholder="Begin here.&#10;&#10;The room is quiet. The page is patient.&#10;Markdown like **bold**, # headings, or - lists will quietly open a preview on the right."></textarea>
@@ -89,6 +98,35 @@
                 </div>
             </div>
         </footer>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu">
+        <div class="menu-item" id="rename-option">Rename</div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="rename-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Rename Tab</h3>
+            <input type="text" id="rename-input" placeholder="New tab name" autocomplete="off">
+            <div class="modal-actions">
+                <button id="cancel-rename" class="modal-btn secondary">Cancel</button>
+                <button id="confirm-rename" class="modal-btn primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Close Tab Modal -->
+    <div id="close-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Close Tab</h3>
+            <p class="modal-text">Are you sure you want to close this tab? Its contents will be lost.</p>
+            <div class="modal-actions">
+                <button id="cancel-close" class="modal-btn secondary">Cancel</button>
+                <button id="confirm-close" class="modal-btn primary">Close</button>
+            </div>
+        </div>
     </div>
 
     <!-- Script Entrypoint -->
